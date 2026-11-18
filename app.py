@@ -34,6 +34,11 @@ state.setdefault("doc_info", None)
 state.setdefault("last_upload_key", None)
 state.setdefault("pending_question", None)
 state.setdefault("doc_error", None)
+state.setdefault("questions_asked", 0)
+
+# A per-visit cap keeps a public demo from using up the API quota. Reloading the page
+# resets it, so it discourages heavy use rather than preventing it.
+limit_reached = bool(settings.question_limit) and state.questions_asked >= settings.question_limit
 
 
 def load_document(source, name: str) -> None:
@@ -96,6 +101,11 @@ with st.sidebar:
         st.caption("Demo Mode is on: answers are quoted from the document. Add an API key to `.env` for AI-written answers.")
     else:
         st.caption(f"AI Mode: {settings.provider.title()}, model `{settings.model}`.")
+    if settings.public_demo:
+        st.caption(
+            "This is a public demo. Please do not upload confidential documents: "
+            "in AI Mode, the passages used for an answer are sent to the AI provider."
+        )
 
     st.divider()
     st.subheader("1. Add a company document")
@@ -121,7 +131,7 @@ with st.sidebar:
     st.subheader("2. Ask a question")
     st.caption("Type in the chat box, or try one of these with the sample PDF:")
     for sample_question in SAMPLE_QUESTIONS:
-        if st.button(sample_question, width="stretch", disabled=state.store is None):
+        if st.button(sample_question, width="stretch", disabled=state.store is None or limit_reached):
             state.pending_question = sample_question
 
     st.divider()
@@ -149,11 +159,16 @@ for message in state.messages:
         st.markdown(message["content"])
         show_sources(message.get("sources", []))
 
-typed_question = st.chat_input("Ask a question about the document...", disabled=state.store is None)
+if limit_reached:
+    st.info(f"This demo allows {settings.question_limit} questions per visit. Reload the page to start again.")
+
+typed_question = st.chat_input(
+    "Ask a question about the document...", disabled=state.store is None or limit_reached
+)
 question = typed_question or state.pending_question
 state.pending_question = None
 
-if question and state.store is not None:
+if question and state.store is not None and not limit_reached:
     history = list(state.messages)
     state.messages.append({"role": "user", "content": question})
     with st.chat_message("user"):
@@ -183,6 +198,9 @@ if question and state.store is not None:
         if answer:
             show_sources(sources)
             state.messages.append({"role": "assistant", "content": answer, "sources": sources})
+            state.questions_asked += 1
+            if settings.question_limit and state.questions_asked >= settings.question_limit:
+                st.rerun()  # redraw with the chat box closed
         else:
             # Keep the history valid: drop the question that got no answer.
             state.messages.pop()

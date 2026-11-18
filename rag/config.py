@@ -38,6 +38,8 @@ class Settings:
     gemini_model: str
     top_k: int
     bot_name: str
+    public_demo: bool  # hosted where anyone can open it: show a privacy notice and cap usage
+    question_limit: int  # questions allowed per visit; 0 means no limit
 
     @property
     def provider(self) -> str | None:
@@ -57,7 +59,10 @@ class Settings:
 
 
 def get_settings() -> Settings:
+    public_demo = os.getenv("PUBLIC_DEMO", "").strip().lower() in ("1", "true", "yes")
     return Settings(
+        public_demo=public_demo,
+        question_limit=max(0, _int_env("SESSION_QUESTION_LIMIT", 15 if public_demo else 0)),
         anthropic_api_key=_clean_key(os.getenv("ANTHROPIC_API_KEY")),
         openai_api_key=_clean_key(os.getenv("OPENAI_API_KEY")),
         gemini_api_key=_clean_key(os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")),

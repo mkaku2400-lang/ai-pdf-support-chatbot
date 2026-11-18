@@ -70,6 +70,8 @@ Never share your `.env` file or commit it to Git; `.gitignore` already excludes 
 
 Gemini offers a free tier. On it, Google may use the text you send to improve its products, so use the free tier for testing with sample data and a paid key for real client data.
 | `TOP_K` | `4` | Document sections sent to the AI per question |
+| `PUBLIC_DEMO` | `false` | Set to `true` when hosting publicly: shows a privacy notice and caps questions per visit |
+| `SESSION_QUESTION_LIMIT` | `15` when public | Questions allowed per visit; reloading the page resets it |
 
 ## How it works
 

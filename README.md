@@ -4,6 +4,9 @@ A chatbot that answers customer questions using **only your company's own docume
 Upload a PDF (FAQ, product catalog, policy manual), and customers can ask questions in
 plain language and get instant answers with the source passage shown.
 
+**Live demo:** https://pdf-support-chatbot-demo.streamlit.app/ (if it has been idle, Streamlit
+takes a few seconds to wake it up). Click **Use Sample Company FAQ PDF** and ask a question.
+
 - **Grounded answers** - replies come from the uploaded document, not from the AI's imagination.
 - **Works with Anthropic Claude, OpenAI or Google Gemini** - choose with one line in `.env`.
 - **Demo Mode** - runs with no API key at all, for testing and demos.
@@ -67,11 +70,11 @@ Never share your `.env` file or commit it to Git; `.gitignore` already excludes 
 | `ANTHROPIC_MODEL` | `claude-opus-5-5` | `claude-sonnet-5-5` and `claude-haiku-5-5` cost less |
 | `OPENAI_MODEL` | `gpt-4o-mini` | Set to a chat model available on your account |
 | `GEMINI_MODEL` | `gemini-3.5-flash-lite` | Any Gemini model your key can use |
-
-Gemini offers a free tier. On it, Google may use the text you send to improve its products, so use the free tier for testing with sample data and a paid key for real client data.
 | `TOP_K` | `4` | Document sections sent to the AI per question |
 | `PUBLIC_DEMO` | `false` | Set to `true` when hosting publicly: shows a privacy notice and caps questions per visit |
 | `SESSION_QUESTION_LIMIT` | `15` when public | Questions allowed per visit; reloading the page resets it |
+
+Gemini offers a free tier. On it, Google may use the text you send to improve its products, so use the free tier for testing with sample data and a paid key for real client data.
 
 ## How it works
 
